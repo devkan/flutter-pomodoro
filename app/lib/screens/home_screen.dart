@@ -9,17 +9,30 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int totalSeconds = 1500;
+  static const twentyFiveMinutes = 1500;
+
+  int totalSeconds = twentyFiveMinutes;
   late Timer timer;
   // import dart:async되어야 하고, Timer를 통해 정해진 가격에 한번씩 함수를 실행하게 한다.
   // timer는 onStartPressed버튼을 누르면 생성이 되는거라서 late를 사용하는 것이다.
 
   bool isRunning = false;
+  int totalPomodoros = 0;
 
   void onTick(Timer timer) {
-    setState(() {
-      totalSeconds = totalSeconds - 1;
-    });
+    if (totalSeconds == 0) {
+      setState(() {
+        totalPomodoros += 1;
+        isRunning = false;
+        totalSeconds = twentyFiveMinutes;
+      });
+
+      timer.cancel();
+    } else {
+      setState(() {
+        totalSeconds = totalSeconds - 1;
+      });
+    }
   }
   // error : The argument type 'void Function()' can't be assigned to the parameter type 'void Function(Timer)'.
   // onTick에 Timer 파라미터가 들어가지 않으면 이 에러가 발생한다.
@@ -50,6 +63,15 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  String format(int seconds) {
+    var duration = Duration(seconds: seconds);
+    // Duration을 이용하면 0:24:54.000000 이처럼 출력해 준다. 그냥 변수함수 같음
+
+    //print(duration);
+    return duration.toString().split('.').first.substring(2, 7);
+    // .을 기준으로 split를 나누어 first(0번째 값)을 가져와 substring으로 2에서 7까지 가져온다.
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
             flex: 1, // 비율설정
             child: Container(
               alignment: Alignment.bottomCenter,
-              child: Text('$totalSeconds',
+              child: Text(format(totalSeconds),
                   style: TextStyle(
                     color: Theme.of(context).cardColor,
                     fontSize: 89,
@@ -113,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         Text(
-                          '0',
+                          '$totalPomodoros',
                           style: TextStyle(
                             fontSize: 58,
                             fontWeight: FontWeight.w600,
